@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "http://172.18.1.137/build/three.module.js"
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="../resource/init.css">
+</head>
+
+<body>
+  <canvas id="canvas" tabindex="0"></canvas>
+</body>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { FirstPersonControls } from './controls.js'
+
+  //初始化threejs
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true
+  })
+  //加个灯光
+  var light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(1, 2, 3);
+  scene.add(light);
+
+
+  const size = 10;
+  const divisions = 10;
+
+  const gridHelper = new THREE.GridHelper(size, divisions);
+  scene.add(gridHelper);
+
+  const clock = new THREE.Clock();
+  const controls = new FirstPersonControls(camera, renderer);
+  // 相机位置
+  camera.position.set(0, 2, 5);
+  controls.updateCamera(camera)
+  // 渲染
+  renderer.render(scene, camera);
+  // 动画
+  var animate = function () {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+    controls.update(clock.getDelta());
+  }
+
+  animate();
+</script>

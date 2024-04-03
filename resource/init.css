@@ -1,0 +1,10 @@
+body {
+  background: #052529;
+  overflow: hidden;
+}
+
+#canvas {
+  width: 100%;
+  height: 100vh;
+  outline: none;
+}

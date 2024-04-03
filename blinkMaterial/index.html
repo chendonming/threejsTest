@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "http://localhost/build/three.module.js"
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="../resource/init.css">
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+</body>
+<script type="module">
+  import * as THREE from 'three';
+
+  //初始化threejs
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true
+  })
+
+  class Phong extends THREE.ShaderMaterial {
+    constructor() {
+      super();
+      this.fragmentShader = `
+      uniform float uOpacity;
+      void main() {
+	      gl_FragColor = vec4( 1.0, 0.0, 0.0, uOpacity);
+      }
+      `
+
+      this.uniforms = {
+        uOpacity: { value: 1.0 }
+      }
+
+      Object.defineProperties(this, {
+        opacity: {
+          get() {
+            return this.uniforms["uOpacity"].value;
+          },
+          set(v) {
+            this.uniforms["uOpacity"].value = v;
+          },
+        },
+      });
+    }
+  }
+
+  class BlinkMaterial extends Phong {
+    constructor(color, speed = 0.005) {
+      super();
+      this.color = new THREE.Color(color);
+      this.transparent = true;
+      this.side = THREE.DoubleSide;
+
+      const animate = () => {
+        // 对opacity进行平滑处理，使其一直在0-1之间平滑改变
+        this.opacity = Math.sin(Date.now() * speed) / 2 + 0.5;
+        this.time = requestAnimationFrame(animate);
+      };
+
+      animate();
+    }
+  }
+
+
+  // 加个cube
+  var geometry = new THREE.BoxGeometry(1, 1, 1);
+  var material = new BlinkMaterial('red')
+
+
+  var cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  //加个灯光
+  var light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(1, 2, 3);
+  scene.add(light);
+
+  // 相机位置
+  camera.position.set(0, 0, 5);
+  // 渲染
+  renderer.render(scene, camera);
+  // 动画
+  var animate = function () {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+
+  animate();
+</script>
+
+</html>
